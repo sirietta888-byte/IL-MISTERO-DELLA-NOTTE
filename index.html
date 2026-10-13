@@ -1,0 +1,1082 @@
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Il Mistero della Notte</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Georgia, "Times New Roman", serif;
+      color: #f5eeee;
+      background:
+        radial-gradient(ellipse at center, #350909 0%, #150404 45%, #050505 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 24px;
+    }
+
+    .schermata {
+      width: 100%;
+      max-width: 720px;
+      padding: 40px 24px;
+      border: 1px solid #722020;
+      background: rgba(0, 0, 0, 0.55);
+      box-shadow: 0 0 35px rgba(160, 0, 0, 0.18);
+    }
+
+    .simbolo {
+      font-size: 48px;
+      color: #c01818;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      color: #d51f27;
+      font-size: clamp(32px, 7vw, 58px);
+      letter-spacing: 3px;
+      margin: 10px 0 20px;
+      text-shadow: 0 0 18px #750000;
+    }
+
+    h2 {
+      color: #e2baba;
+      font-size: 28px;
+    }
+
+    p {
+      color: #d1bebe;
+      font-size: 18px;
+      line-height: 1.6;
+    }
+
+    .pulsante {
+      display: block;
+      width: 100%;
+      max-width: 380px;
+      margin: 16px auto;
+      padding: 16px;
+      color: white;
+      background: #690b10;
+      border: 1px solid #bd3434;
+      font-family: inherit;
+      font-size: 17px;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .pulsante:hover {
+      background: #a20e17;
+      box-shadow: 0 0 20px rgba(210, 0, 0, 0.35);
+      transform: scale(1.02);
+    }
+
+    .secondario {
+      background: #171010;
+      border-color: #604040;
+    }
+
+    .nascosto {
+      display: none;
+    }
+
+    .nota {
+      font-size: 14px;
+      color: #a98d8d;
+      margin-top: 24px;
+    }
+
+    input {
+      display: block;
+      width: 100%;
+      max-width: 380px;
+      margin: 18px auto;
+      padding: 14px;
+      color: white;
+      background: #100909;
+      border: 1px solid #722020;
+      font-size: 16px;
+    }
+
+.scelta-numeri {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  max-width: 440px;
+  margin: 20px auto;
+}
+
+.numero-btn {
+  padding: 13px 5px;
+  color: #e8cccc;
+  background: #120808;
+  border: 1px solid #642027;
+  font-family: Georgia, serif;
+  font-size: 18px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.numero-btn:hover,
+.numero-btn.selezionato {
+  color: white;
+  background: #8b101b;
+  border-color: #f04450;
+  box-shadow: 0 0 12px #8b101b;
+}
+
+@media (max-width: 400px) {
+  .scelta-numeri {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.luoghi-horror {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  max-width: 600px;
+  margin: 22px auto;
+}
+
+.luogo-card {
+  padding: 10px;
+  background: #100909;
+  color: #f0dddd;
+  border: 1px solid #642027;
+  font-family: Georgia, serif;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+.luogo-card:hover,
+.luogo-card.selezionato {
+  background: #2b0b10;
+  border-color: #f04450;
+  box-shadow: 0 0 16px #8b101b;
+  color: white;
+}
+
+.luogo-immagine {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100px;
+  margin-bottom: 10px;
+  background: radial-gradient(circle, #542027, #100909 75%);
+  font-size: 42px;
+}
+
+#luogoScelto {
+  color: #d7aaaa;
+  text-align: center;
+}
+
+@media (max-width: 400px) {
+  .luoghi-horror {
+    gap: 8px;
+  }
+
+  .luogo-card {
+    font-size: 14px;
+  }
+}
+
+.durate-horror {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  width: 100%;
+  max-width: 480px;
+  margin: 24px auto;
+  justify-content: center;
+}
+
+.durata-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 150px;
+  padding: 20px 12px;
+  background: #100909;
+  color: #f0dddd;
+  border: 1px solid #642027;
+  border-radius: 8px;
+  font-family: Georgia, serif;
+  cursor: pointer;
+  text-align: center;
+  transition: 0.25s ease;
+}
+
+.durata-card:hover,
+.durata-card.selezionato {
+  background: #2b0b10;
+  border-color: #f04450;
+  box-shadow: 0 0 18px #8b101b;
+  transform: translateY(-2px);
+}
+
+.durata-icona {
+  font-size: 32px;
+}
+
+.durata-tempo {
+  font-size: 19px;
+  font-weight: bold;
+}
+
+.durata-descrizione {
+  color: #d7aaaa;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+#durataScelta {
+  text-align: center;
+  color: #d7aaaa;
+}
+
+@media (max-width: 400px) {
+  .durate-horror {
+    gap: 10px;
+  }
+
+  .durata-card {
+    min-height: 135px;
+    padding: 14px 6px;
+  }
+
+  .durata-tempo {
+    font-size: 16px;
+  }
+}
+
+.scheda-horror {
+  max-width: 650px;
+  margin: 24px auto;
+  padding: 20px;
+  background: #100909;
+  border: 1px solid #642027;
+  border-radius: 8px;
+  box-shadow: 0 0 16px #350b10;
+}
+
+.scheda-horror p:first-child {
+  color: #d7aaaa;
+  letter-spacing: 2px;
+}
+
+.scheda-horror h3 {
+  color: #f04450;
+  font-family: Georgia, serif;
+}.schede-giocatori {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  max-width: 800px;
+  margin: 24px auto;
+}
+
+.giocatore-card {
+  padding: 20px;
+  background: #100909;
+  border: 1px solid #642027;
+  border-radius: 8px;
+  color: #f0dddd;
+  text-align: center;
+}
+
+.giocatore-card h3 {
+  color: #f04450;
+}
+
+.giocatore-card button {
+  margin-top: 10px;
+}
+
+  </style>
+</head>
+
+<body>
+  <main class="schermata">
+    <div class="simbolo">☠</div>
+
+    <section id="inizio">
+      <h1>IL MISTERO<br>DELLA NOTTE</h1>
+      <p>La verità è sepolta nell'oscurità.</p>
+      <p>Ogni indizio nasconde un segreto.<br>Di chi ti puoi fidare?</p>
+
+      <button class="pulsante" onclick="mostraRuoli()">
+        ENTRA NEL MISTERO
+      </button>
+    </section>
+
+    <section id="ruoli" class="nascosto">
+      <h2>Chi sei?</h2>
+      <p>Scegli come vuoi partecipare all'indagine.</p>
+
+      <button class="pulsante" onclick="mostraMaster()">
+        ☠ SONO IL MASTER
+      </button>
+
+      <button class="pulsante secondario" onclick="mostraPartecipante()">
+        ENTRA COME PARTECIPANTE
+      </button>
+
+      <button class="pulsante secondario" onclick="tornaInizio()">
+        INDIETRO
+      </button>
+    </section>
+
+    <section id="master" class="nascosto">
+      <h2>La stanza del Master</h2>
+      <p>Tu guiderai l'indagine e preparerai la partita.</p>
+      <p>Nel prossimo passaggio aggiungeremo le impostazioni per scegliere il luogo, il numero di partecipanti e gli altri dettagli.</p>
+
+      <button class="pulsante" onclick="mostraConfigurazione()">
+  PREPARA LA PARTITA
+</button>
+
+      <button class="pulsante secondario" onclick="mostraRuoli()">
+        INDIETRO
+      </button>
+    </section>
+
+<section id="configurazione" class="nascosto">
+  <h2>Prepara l'indagine</h2>
+  <p>Master, scegli i dettagli della tua partita.</p>
+
+  <label for="luogo">Dove si svolge l'indagine?</label>
+
+<div class="luoghi-horror">
+  <button type="button" class="luogo-card selezionato"
+    onclick="selezionaLuogo('villa', this)">
+    <span class="luogo-immagine villa">🏚️</span>
+    <span>Villa abbandonata</span>
+  </button>
+
+  <button type="button" class="luogo-card"
+    onclick="selezionaLuogo('castello', this)">
+    <span class="luogo-immagine castello">🏰</span>
+    <span>Castello maledetto</span>
+  </button>
+
+  <button type="button" class="luogo-card"
+    onclick="selezionaLuogo('ospedale', this)">
+    <span class="luogo-immagine ospedale">🏥</span>
+    <span>Ospedale abbandonato</span>
+  </button>
+
+  <button type="button" class="luogo-card"
+    onclick="selezionaLuogo('paese', this)">
+    <span class="luogo-immagine paese">🌫️</span>
+    <span>Paese misterioso</span>
+  </button>
+</div>
+
+<input type="hidden" id="luogo" value="villa">
+<p id="luogoScelto">Luogo selezionato: Villa abbandonata</p>
+
+  <label for="numero">Quanti partecipanti giocheranno?</label>
+  
+<div class="scelta-numeri" id="sceltaNumeri">
+ 
+  <button type="button" class="numero-btn" onclick="selezionaNumero(6)">6</button>
+  <button type="button" class="numero-btn" onclick="selezionaNumero(7)">7</button>
+  <button type="button" class="numero-btn" onclick="selezionaNumero(8)">8</button>
+  <button type="button" class="numero-btn" onclick="selezionaNumero(9)">9</button>
+  <button type="button" class="numero-btn" onclick="selezionaNumero(10)">10</button>
+  <button type="button" class="numero-btn" onclick="selezionaNumero(11)">11</button>
+  <button type="button" class="numero-btn" onclick="selezionaNumero(12)">12</button>
+  <button type="button" class="numero-btn" onclick="selezionaNumero(13)">13</button>
+  <button type="button" class="numero-btn" onclick="selezionaNumero(14)">14</button>
+  <button type="button" class="numero-btn" onclick="selezionaNumero(15)">15</button>
+  <button type="button" class="numero-btn" onclick="selezionaNumero(16)">16</button>
+  <button type="button" class="numero-btn" onclick="selezionaNumero(17)">17</button>
+  <button type="button" class="numero-btn" onclick="selezionaNumero(18)">18</button>
+  <button type="button" class="numero-btn" onclick="selezionaNumero(19)">19</button>
+  <button type="button" class="numero-btn" onclick="selezionaNumero(20)">20</button>
+  <button type="button" class="numero-btn" onclick="selezionaNumero(21)">21</button>
+  <button type="button" class="numero-btn" onclick="selezionaNumero(22)">22</button>
+  <button type="button" class="numero-btn" onclick="selezionaNumero(23)">23</button>
+  <button type="button" class="numero-btn" onclick="selezionaNumero(24)">24</button>
+  <button type="button" class="numero-btn" onclick="selezionaNumero(25)">25</button>
+  <button type="button" class="numero-btn" onclick="selezionaNumero(26)">26</button>
+  <button type="button" class="numero-btn" onclick="selezionaNumero(27)">27</button>
+  <button type="button" class="numero-btn" onclick="selezionaNumero(28)">28</button>
+  <button type="button" class="numero-btn" onclick="selezionaNumero(29)">29</button>
+  <button type="button" class="numero-btn" onclick="selezionaNumero(30)">30</button>
+</div>
+
+<input type="hidden" id="numero" value="4">
+<p id="numeroScelto" class="nota">Partecipanti selezionati: 4</p>
+
+  <label for="durata">Durata della partita</label>
+
+
+<div class="durate-horror">
+  <button type="button" class="durata-card selezionato"
+    onclick="selezionaDurata(30, this)">
+    <span class="durata-icona">🕯️</span>
+    <span class="durata-tempo">30 minuti</span>
+    <span class="durata-descrizione">Indagine rapida</span>
+  </button>
+
+  <button type="button" class="durata-card"
+    onclick="selezionaDurata(60, this)">
+    <span class="durata-icona">🌑</span>
+    <span class="durata-tempo">60 minuti</span>
+    <span class="durata-descrizione">Una notte oscura</span>
+  </button>
+
+  <button type="button" class="durata-card"
+    onclick="selezionaDurata(90, this)">
+    <span class="durata-icona">⌛</span>
+    <span class="durata-tempo">90 minuti</span>
+    <span class="durata-descrizione">Terrore prolungato</span>
+  </button>
+
+  <button type="button" class="durata-card"
+    onclick="selezionaDurata(120, this)">
+    <span class="durata-icona">🌕</span>
+    <span class="durata-tempo">120 minuti</span>
+    <span class="durata-descrizione">La notte infinita</span>
+  </button>
+</div>
+
+<input type="hidden" id="durata" value="30">
+<p id="durataScelta" class="nota">
+  Durata selezionata: 30 minuti
+</p>
+
+
+
+
+  <button class="pulsante" onclick="creaPartita()">
+    CREA LA PARTITA
+  </button>
+
+  <p id="riepilogo" class="nota"></p>
+
+  <button class="pulsante secondario" onclick="mostraMaster()">
+    INDIETRO
+  </button>
+</section>
+
+<section id="partitaCreata" class="nascosto">
+  <h2>La partita è pronta</h2>
+  <p>Condividi questi dati con i tuoi investigatori.</p>
+
+  <p>CODICE DELLA PARTITA</p>
+  <h3 id="codiceCreato">----</h3>
+
+  <label for="linkInvito">Link d'invito</label>
+  <input id="linkInvito" type="text" readonly>
+
+  <button class="pulsante" onclick="copiaInvito()">
+    COPIA LINK D'INVITO
+  </button>
+
+  <p id="messaggioInvito" class="nota"></p>
+  
+<hr>
+<div class="scheda-horror">
+  <h3>Elenco degli investigatori</h3>
+  <p>Inserisci un nome per riga, nell'ordine dei partecipanti.</p>
+
+  <textarea
+    id="nomiPartecipanti"
+    rows="5"
+    placeholder="Es.&#10;Marco&#10;Giulia&#10;Luca&#10;Sara"
+  ></textarea>
+
+  <p class="nota">
+    Per questa versione, il Master inserisce i nomi manualmente.
+  </p>
+</div>
+<h3>Investigatori in attesa</h3>
+<p class="nota">Partecipanti entrati nella sala:</p>
+
+<ul id="listaPartecipanti">
+  <li>In attesa dei partecipanti...</li>
+</ul>
+
+<p id="statoPartita" class="nota">
+  La partita non è ancora iniziata.
+</p>
+
+<button class="pulsante" onclick="iniziaIndagine()">
+  INIZIA L'INDAGINE
+</button>
+
+
+  <button class="pulsante secondario" onclick="mostraConfigurazione()">
+    MODIFICA IMPOSTAZIONI
+  </button>
+</section>
+
+<section id="schermataIndagine" class="nascosto">
+  <h2>IL MISTERO DELLA NOTTE</h2>
+  <p class="nota">L'indagine è cominciata...</p>
+
+  <div class="scheda-horror">
+    <p>LUOGO DELL'INDAGINE</p>
+    <h3 id="luogoIndagine">Villa abbandonata</h3>
+
+    <p>TEMPO A DISPOSIZIONE</p>
+    <h3 id="tempoIndagine">30 minuti</h3>
+  </div>
+
+  <div class="scheda-horror">
+    <h3>Il mistero</h3>
+    <p id="introduzioneIndagine">
+      La notte è silenziosa. Una porta cigola nel buio.
+      Qualcosa vi sta aspettando. Esplorate con attenzione
+      e cercate gli indizi prima che sia troppo tardi.
+    </p>
+  </div>
+
+  <div class="scheda-horror">
+    <h3>Il tuo diario</h3>
+    <p id="diarioIndagine">
+      Non hai ancora scoperto nessun indizio.
+    </p>
+  </div>
+  <button class="pulsante" onclick="terminaIndagine()">
+  CONCLUDI L'INDAGINE
+</button>
+</section>
+
+
+<section id="schermataRuoli" class="nascosto">
+  <h2>I vostri ruoli segreti</h2>
+  <p class="nota">Seleziona un investigatore per scoprire il suo ruolo.</p>
+
+  <div id="schedeGiocatori" class="schede-giocatori"></div>
+
+  <button class="pulsante secondario" onclick="tornaAllIndagine()">
+    TORNA ALL'INDAGINE
+  </button>
+</section>
+
+<section id="schermataFinale" class="nascosto">
+  <h2>LA NOTTE È FINITA</h2>
+
+  <div class="scheda-horror">
+    <h3>Il caso è chiuso?</h3>
+    <p>
+      La notte ha rivelato alcuni dei suoi segreti.
+      Ma la verità potrebbe essere ancora nascosta...
+    </p>
+
+    <p><strong>Luogo:</strong> <span id="luogoFinale"></span></p>
+    <p><strong>Indizi scoperti:</strong> <span id="numeroIndiziFinale">0</span></p>
+
+    <h3>Indizi raccolti</h3>
+    <ul id="elencoIndiziFinale">
+      <li>Nessun indizio trovato.</li>
+    </ul>
+  </div>
+
+  <button class="pulsante" onclick="ricominciaPartita()">
+    NUOVA INDAGINE
+  </button>
+</section>
+
+
+
+
+
+    <section id="partecipante" class="nascosto">
+      <h2>Unisciti all'indagine</h2>
+      <p>Il Master dovrà condividere con te il link della partita.</p>
+
+      <input id="nomeGiocatore" type="text" placeholder="Scrivi il tuo nome">
+
+      <input id="codicePartita" type="text" placeholder="Codice della partita">
+
+      <button class="pulsante" onclick="entraPartita()">
+        UNISCITI ALLA PARTITA
+      </button>
+
+      <p id="messaggio" class="nota"></p>
+
+      <button class="pulsante secondario" onclick="mostraRuoli()">
+        INDIETRO
+      </button>
+    </section>
+  
+<section id="salaAttesa" class="nascosto">
+  <h2>La tua indagine sta per iniziare</h2>
+
+  <p>Benvenuto, investigatore:</p>
+  <h3 id="nomeInAttesa"></h3>
+
+  <p>Codice della partita:</p>
+  <h3 id="codiceInAttesa"></h3>
+
+  <p class="nota">
+    Attendi che il Master dia inizio all'indagine...
+  </p>
+
+  <button class="pulsante secondario" onclick="mostraPartecipante()">
+    INDIETRO
+  </button>
+</section>
+
+  </main>
+
+  <script>
+    function nascondiTutto() {
+      document.getElementById("inizio").classList.add("nascosto");
+      document.getElementById("ruoli").classList.add("nascosto");
+      document.getElementById("master").classList.add("nascosto");
+      document.getElementById("partecipante").classList.add("nascosto");
+    }
+
+    function mostraRuoli() {
+      nascondiTutto();
+      document.getElementById("ruoli").classList.remove("nascosto");
+    }
+
+    function mostraMaster() {
+      nascondiTutto();
+      document.getElementById("master").classList.remove("nascosto");
+    }
+
+function mostraConfigurazione() {
+  nascondiTutto();
+  document.getElementById("configurazione").classList.remove("nascosto");
+}
+
+function selezionaNumero(numero) {
+  document.getElementById("numero").value = numero;
+  document.getElementById("numeroScelto").textContent =
+    "Partecipanti selezionati: " + numero;
+
+  document.querySelectorAll(".numero-btn").forEach(function(pulsante) {
+    pulsante.classList.remove("selezionato");
+  });
+
+  document.querySelectorAll(".numero-btn").forEach(function(pulsante) {
+    if (pulsante.textContent.trim() === String(numero)) {
+      pulsante.classList.add("selezionato");
+    }
+  });
+}
+function selezionaLuogo(luogo, pulsante) {
+  const campoLuogo = document.getElementById("luogo");
+  const testoLuogo = document.getElementById("luogoScelto");
+
+  if (!campoLuogo || !testoLuogo || !pulsante) {
+    return;
+  }
+
+  campoLuogo.value = luogo;
+
+  const nomi = {
+    villa: "Villa abbandonata",
+    castello: "Castello maledetto",
+    ospedale: "Ospedale abbandonato",
+    paese: "Paese misterioso"
+  };
+
+  testoLuogo.textContent =
+    "Luogo selezionato: " + nomi[luogo];
+
+  document.querySelectorAll(".luogo-card").forEach(function(card) {
+    card.classList.remove("selezionato");
+    card.setAttribute("aria-pressed", "false");
+  });
+
+  pulsante.classList.add("selezionato");
+  pulsante.setAttribute("aria-pressed", "true");
+}
+function selezionaDurata(minuti, pulsante) {
+  document.getElementById("durata").value = minuti;
+
+  document.getElementById("durataScelta").textContent =
+    "Durata selezionata: " + minuti + " minuti";
+
+  document.querySelectorAll(".durata-card").forEach(function(card) {
+    card.classList.remove("selezionato");
+  });
+
+  pulsante.classList.add("selezionato");
+}
+
+function creaPartita() {
+  const luogo = document.getElementById("luogo").value;
+  const numero = document.getElementById("numero").value;
+  const durata = document.getElementById("durata").value;
+
+  // Genera un codice per la partita
+  const codice = Math.random().toString(36).substring(2, 8).toUpperCase();
+
+  // Mostra il riepilogo delle scelte
+  document.getElementById("riepilogo").textContent =
+    "Partita configurata! Luogo: " + luogo +
+    " | Partecipanti: " + numero +
+    " | Durata: " + durata + " minuti.";
+
+  // Mostra il codice e prepara il link d'invito
+  document.getElementById("codiceCreato").textContent = codice;
+
+  const link = new URL(window.location.href);
+  link.searchParams.set("partita", codice);
+
+  document.getElementById("linkInvito").value = link.href;
+
+  // Nasconde la configurazione e mostra la nuova schermata
+  document.getElementById("configurazione").classList.add("nascosto");
+  document.getElementById("partitaCreata").classList.remove("nascosto");
+}
+
+function copiaInvito() {
+  const campoLink = document.getElementById("linkInvito");
+  const messaggio = document.getElementById("messaggioInvito");
+
+  campoLink.select();
+  campoLink.setSelectionRange(0, 99999);
+
+  navigator.clipboard.writeText(campoLink.value)
+    .then(function() {
+      messaggio.textContent = "Link copiato! Puoi inviarlo ai partecipanti.";
+    })
+    .catch(function() {
+      messaggio.textContent =
+        "Seleziona e copia il link manualmente.";
+    });
+}
+
+
+function iniziaIndagine() {
+  const luoghi = {
+    villa: "Villa abbandonata",
+    castello: "Castello maledetto",
+    ospedale: "Ospedale abbandonato",
+    paese: "Paese misterioso"
+  };
+
+  const luogoScelto = document.getElementById("luogo").value;
+  const durataScelta = Number(document.getElementById("durata").value);
+
+  document.getElementById("luogoIndagine").textContent =
+    luoghi[luogoScelto] || "Luogo misterioso";
+
+  document.getElementById("tempoIndagine").textContent =
+    durataScelta + " minuti";
+
+  document.getElementById("introduzioneIndagine").textContent =
+    "Le porte si chiudono alle vostre spalle. " +
+    "Il silenzio avvolge il luogo. " +
+    "Esplorate, cercate indizi e scoprite la verità " +
+    "prima che la notte vi inghiotta.";
+
+  document.getElementById("partitaCreata").classList.add("nascosto");
+document.getElementById("schermataIndagine").classList.add("nascosto");
+document.getElementById("schermataRuoli").classList.remove("nascosto");
+
+preparaRuoli();
+}
+
+const ruoliHorror = [
+  {
+    nome: "Investigatore",
+    descrizione: "Devi scoprire cosa è accaduto in questo luogo.",
+    indizio: "Hai trovato impronte vicino a una porta chiusa."
+  },
+  {
+    nome: "Testimone",
+    descrizione: "Conosci un dettaglio che gli altri ignorano.",
+    indizio: "Poco prima della mezzanotte hai sentito tre colpi."
+  },
+  {
+    nome: "Custode",
+    descrizione: "Conosci alcuni segreti del luogo.",
+    indizio: "Una chiave misteriosa è sparita dalla stanza principale."
+  },
+  {
+    nome: "Sospettato",
+    descrizione: "Gli altri potrebbero dubitare di te.",
+    indizio: "Qualcuno ti ha visto vicino alla scena del mistero."
+  }
+];
+
+
+function preparaRuoli() {
+  const contenitore = document.getElementById("schedeGiocatori");
+  const numero = Number(document.getElementById("numero").value);
+
+  const campoNomi = document.getElementById("nomiPartecipanti");
+  const nomiInseriti = campoNomi
+    ? campoNomi.value.split("\n")
+        .map(nome => nome.trim())
+        .filter(nome => nome !== "")
+    : [];
+
+  const nomi = [];
+
+  for (let i = 0; i < numero; i++) {
+    nomi.push(nomiInseriti[i] || "Giocatore " + (i + 1));
+  }
+
+  const ruoliDisponibili = [...ruoliHorror];
+
+  // Mescola i ruoli in ordine casuale
+  for (let i = ruoliDisponibili.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [ruoliDisponibili[i], ruoliDisponibili[j]] =
+      [ruoliDisponibili[j], ruoliDisponibili[i]];
+  }
+
+  contenitore.innerHTML = "";
+
+  nomi.forEach(function(nome, i) {
+    const ruolo = ruoliDisponibili[i % ruoliDisponibili.length];
+    const scheda = document.createElement("div");
+
+    scheda.className = "giocatore-card";
+
+    const titolo = document.createElement("h3");
+    titolo.textContent = nome;
+
+    const pulsante = document.createElement("button");
+    pulsante.className = "pulsante";
+    pulsante.textContent = "SCOPRI IL RUOLO";
+
+    const dettagli = document.createElement("div");
+    dettagli.className = "nascosto";
+
+    const nomeRuolo = document.createElement("p");
+    nomeRuolo.textContent = "Ruolo: " + ruolo.nome;
+
+    const descrizione = document.createElement("p");
+    descrizione.textContent = ruolo.descrizione;
+
+    const indizio = document.createElement("p");
+    indizio.textContent = "Indizio segreto: " + ruolo.indizio;
+
+    dettagli.append(nomeRuolo, descrizione, indizio);
+
+    pulsante.onclick = function() {
+      dettagli.classList.toggle("nascosto");
+      pulsante.textContent = dettagli.classList.contains("nascosto")
+        ? "SCOPRI IL RUOLO"
+        : "NASCONDI IL RUOLO";
+    };
+
+    scheda.append(titolo, pulsante, dettagli);
+    contenitore.appendChild(scheda);
+  });
+}
+
+
+function tornaAllIndagine() {
+  document.getElementById("schermataRuoli").classList.add("nascosto");
+  document.getElementById("schermataIndagine").classList.remove("nascosto");
+  avviaTimer();
+}
+
+    function mostraPartecipante() {
+      nascondiTutto();
+      document.getElementById("partecipante").classList.remove("nascosto");
+    }
+document.getElementById("configurazione").classList.add("nascosto");
+    function tornaInizio() {
+      nascondiTutto();
+      document.getElementById("inizio").classList.remove("nascosto");
+    }
+
+function entraPartita() {
+  const nome = document.getElementById("nomeGiocatore").value.trim();
+  const codice = document.getElementById("codicePartita").value.trim();
+  const messaggio = document.getElementById("messaggio");
+
+  if (nome === "" || codice === "") {
+    messaggio.textContent =
+      "Inserisci il tuo nome e il codice della partita.";
+    return;
+  }
+
+  document.getElementById("nomeInAttesa").textContent = nome;
+  document.getElementById("codiceInAttesa").textContent =
+    codice.toUpperCase();
+
+  document.getElementById("partecipante").classList.add("nascosto");
+  document.getElementById("salaAttesa").classList.remove("nascosto");
+}
+
+function mostraPartecipante() {
+  document.getElementById("salaAttesa").classList.add("nascosto");
+  document.getElementById("partecipante").classList.remove("nascosto");
+}
+
+let timerIntervallo = null;
+let secondiRimanenti = 0;
+let indiziTrovati = [];
+
+const indiziHorror = {
+  villa: [
+    "Un diario bruciato contiene una data: 13 ottobre.",
+    "Sul pavimento trovi impronte che finiscono davanti a un muro.",
+    "Una fotografia mostra una persona che non compare nei registri."
+  ],
+  castello: [
+    "Una chiave arrugginita porta lo stemma di una famiglia scomparsa.",
+    "Dietro un ritratto trovi un messaggio scritto al contrario.",
+    "Le campane suonano, anche se la torre è vuota."
+  ],
+  ospedale: [
+    "Una cartella clinica riporta un paziente senza nome.",
+    "Un registratore ripete tre volte la parola 'ritorna'.",
+    "Sul vetro compare una mano dall'altro lato della stanza."
+  ],
+  paese: [
+    "Tutti gli orologi del paese sono fermi alla stessa ora.",
+    "Una lettera avverte di non aprire la porta della vecchia scuola.",
+    "Le impronte nella nebbia arrivano fino alla piazza, poi spariscono."
+  ]
+};
+
+function avviaTimer() {
+  if (timerIntervallo !== null) {
+    clearInterval(timerIntervallo);
+  }
+
+  secondiRimanenti =
+    Number(document.getElementById("durata").value) * 60;
+
+  aggiornaTimer();
+
+  timerIntervallo = setInterval(function() {
+    secondiRimanenti--;
+    aggiornaTimer();
+
+    if (secondiRimanenti <= 0) {
+      clearInterval(timerIntervallo);
+      timerIntervallo = null;
+
+      terminaIndagine();
+    }
+  }, 1000);
+}
+
+function aggiornaTimer() {
+  const minuti = Math.floor(secondiRimanenti / 60);
+  const secondi = secondiRimanenti % 60;
+
+  document.getElementById("timerIndagine").textContent =
+    String(minuti).padStart(2, "0") + ":" +
+    String(secondi).padStart(2, "0");
+}
+
+function trovaIndizio() {
+  const luogo = document.getElementById("luogo").value;
+  const elenco = indiziHorror[luogo] || indiziHorror.villa;
+  const disponibili = elenco.filter(function(indizio) {
+    return !indiziTrovati.includes(indizio);
+  });
+
+  const messaggio = document.getElementById("messaggioIndizio");
+
+  if (disponibili.length === 0) {
+    messaggio.textContent =
+      "Avete trovato tutti gli indizi disponibili in questo luogo.";
+    return;
+  }
+
+  const indice = Math.floor(Math.random() * disponibili.length);
+  const indizio = disponibili[indice];
+
+  indiziTrovati.push(indizio);
+
+  document.getElementById("diarioIndagine").textContent =
+    indiziTrovati.join(" • ");
+
+  messaggio.textContent = "Nuovo indizio: " + indizio;
+}
+
+function salvaNote() {
+  const note = document.getElementById("noteInvestigatore").value;
+  document.getElementById("messaggioNote").textContent =
+    note.trim() === ""
+      ? "Non hai ancora scritto delle note."
+      : "Note aggiornate in questa schermata.";
+}
+
+function terminaIndagine() {
+  if (timerIntervallo !== null) {
+    clearInterval(timerIntervallo);
+    timerIntervallo = null;
+  }
+
+  const luoghi = {
+    villa: "Villa abbandonata",
+    castello: "Castello maledetto",
+    ospedale: "Ospedale abbandonato",
+    paese: "Paese misterioso"
+  };
+
+  document.getElementById("luogoFinale").textContent =
+    luoghi[document.getElementById("luogo").value] || "Luogo misterioso";
+
+  document.getElementById("numeroIndiziFinale").textContent =
+    indiziTrovati.length;
+
+  const elenco = document.getElementById("elencoIndiziFinale");
+  elenco.innerHTML = "";
+
+  if (indiziTrovati.length === 0) {
+    const elemento = document.createElement("li");
+    elemento.textContent = "Nessun indizio trovato.";
+    elenco.appendChild(elemento);
+  } else {
+    indiziTrovati.forEach(function(indizio) {
+      const elemento = document.createElement("li");
+      elemento.textContent = indizio;
+      elenco.appendChild(elemento);
+    });
+  }
+
+  document.getElementById("schermataIndagine").classList.add("nascosto");
+  document.getElementById("schermataRuoli").classList.add("nascosto");
+  document.getElementById("partitaCreata").classList.add("nascosto");
+  document.getElementById("schermataFinale").classList.remove("nascosto");
+}
+
+function ricominciaPartita() {
+  if (timerIntervallo !== null) {
+    clearInterval(timerIntervallo);
+    timerIntervallo = null;
+  }
+
+  indiziTrovati = [];
+
+  document.getElementById("diarioIndagine").textContent =
+    "Non hai ancora scoperto nessun indizio.";
+
+  document.getElementById("messaggioIndizio").textContent = "";
+  document.getElementById("noteInvestigatore").value = "";
+  document.getElementById("messaggioNote").textContent = "";
+
+  document.getElementById("schermataFinale").classList.add("nascosto");
+  document.getElementById("configurazione").classList.remove("nascosto");
+}
+
+  </script>
+</body>
+</html>
