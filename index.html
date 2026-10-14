@@ -190,6 +190,33 @@
     .badge-ruolo { color: #f04450; margin-left: 6px; }
     .soluzione { border-color: #f04450; }
     .avviso { color: #f0b0b0; font-size: 14px; }
+
+    /* --- regole e turni --- */
+    .regole { text-align: left; padding-left: 22px; }
+    .regole li { margin: 12px 0; font-size: 18px; line-height: 1.5; color: #f0dddd; }
+    .turno-grande {
+      color: #fff; background: #8b101b; border: 2px solid #f04450; border-radius: 8px;
+      padding: 28px 12px; font-size: clamp(30px, 9vw, 52px); letter-spacing: 2px; margin: 18px 0;
+      box-shadow: 0 0 30px #8b101b; animation: pulsa 1.4s ease-in-out infinite;
+    }
+    @keyframes pulsa { 50% { box-shadow: 0 0 55px #f04450; } }
+    .banner-turno { border: 1px solid #642027; border-radius: 8px; padding: 10px 14px; margin: 14px 0; background: #100909; }
+    .banner-turno p { margin: 6px 0; font-size: 16px; }
+
+    /* --- fase 3: votazioni, risultato, master --- */
+    .opzione-voto {
+      display: block; width: 100%; max-width: 380px; margin: 10px auto; padding: 16px;
+      color: #f0dddd; background: #100909; border: 1px solid #642027; border-radius: 8px;
+      font-family: inherit; font-size: 18px; cursor: pointer;
+    }
+    .opzione-voto:hover { background: #2b0b10; border-color: #f04450; }
+    .esito { font-size: 26px; color: #f04450; text-align: center; margin: 10px 0; }
+    .riga-esito { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #3a1519; }
+    .tag-eliminato { color: #a98d8d; font-size: 13px; margin-left: 6px; }
+    .fase-etichetta { color: #f04450; letter-spacing: 3px; font-size: 14px; text-transform: uppercase; }
+    .stat-riga { font-size: 15px; color: #d7aaaa; margin: 4px 0; }
+    .opzioni-lobby label { display: block; text-align: left; margin: 10px 0; color: #d1bebe; font-size: 16px; }
+    .opzioni-lobby input[type=checkbox] { display: inline-block; width: auto; margin: 0 8px 0 0; vertical-align: middle; }
   </style>
 </head>
 
@@ -272,6 +299,7 @@
       <button class="pulsante secondario" onclick="mostraMaster()">INDIETRO</button>
     </section>
 
+    <!-- LOBBY DEL MASTER -->
     <section id="partitaCreata" class="nascosto" data-schermata>
       <h2>La partita è pronta</h2>
       <p>Condividi questi dati con i tuoi investigatori.</p>
@@ -291,15 +319,41 @@
         <p id="statoPartita" class="nota">La partita non è ancora iniziata.</p>
       </div>
 
+      <div class="scheda-horror opzioni-lobby">
+        <h3>Opzioni della partita</h3>
+        <label><input type="checkbox" id="optRuolo"> Rivela il ruolo di chi viene eliminato</label>
+        <label><input type="checkbox" id="optPausa"> Permetti al Master di mettere in pausa il timer</label>
+      </div>
+
       <button class="pulsante" onclick="iniziaIndagine()">INIZIA L'INDAGINE</button>
       <button class="pulsante secondario" onclick="mostraConfigurazione()">MODIFICA IMPOSTAZIONI</button>
     </section>
 
-    <!-- PANNELLO MASTER (dati letti solo con il token Master) -->
+    <!-- PANNELLO MASTER (i dati arrivano solo con il token Master) -->
     <section id="pannelloMaster" class="nascosto" data-schermata>
       <h2>Pannello del Master</h2>
       <p>LUOGO: <strong id="masterLuogo"></strong></p>
-      <div class="timer" id="masterTimer">--:--</div>
+      <div class="fase-etichetta" id="masterFase"></div>
+      <div class="timer timer-live" id="masterTimer">--:--</div>
+      <button class="pulsante secondario nascosto" id="btnPausa" onclick="alternaPausa()">METTI IN PAUSA</button>
+
+      <div class="scheda-horror">
+        <p class="stat-riga" id="masterStat1"></p>
+        <p class="stat-riga" id="masterStat2"></p>
+      </div>
+
+      <div class="scheda-horror" id="masterControlli">
+        <h3>Conduzione della partita</h3>
+        <div id="masterInfoGiro" class="nascosto">
+          <p id="masterDomanda"></p>
+          <p>PARLA ORA: <strong id="masterParla">-</strong></p>
+          <p>Hanno già parlato: <span id="masterHannoParlato">-</span></p>
+          <p>Devono ancora parlare: <span id="masterDevonoParlare">-</span></p>
+        </div>
+        <p id="masterInfoVoto" class="nascosto"></p>
+        <div id="masterEsito" class="nascosto"></div>
+        <div id="masterAzioni"></div>
+      </div>
 
       <div class="scheda-horror soluzione">
         <h3>Soluzione del mistero</h3>
@@ -313,16 +367,7 @@
       </div>
 
       <p class="avviso">Tieni questo schermo lontano dagli altri partecipanti.</p>
-      <button class="pulsante secondario" onclick="terminaIndagine()">CONCLUDI L'INDAGINE</button>
-    </section>
-
-    <section id="schermataFinale" class="nascosto" data-schermata>
-      <h2>LA NOTTE È FINITA</h2>
-      <div class="scheda-horror">
-        <h3>Il caso è chiuso?</h3>
-        <p>La notte ha rivelato alcuni dei suoi segreti. Ma la verità potrebbe essere ancora nascosta...</p>
-      </div>
-      <button class="pulsante" onclick="ricominciaPartita()">NUOVA INDAGINE</button>
+      <button class="pulsante secondario" onclick="terminaPartita()">TERMINA LA PARTITA</button>
     </section>
 
     <section id="partecipante" class="nascosto" data-schermata>
@@ -340,7 +385,6 @@
       <h3 id="nomeInAttesa"></h3>
       <p>Codice della partita:</p>
       <h3 id="codiceInAttesa"></h3>
-
       <div class="scheda-horror">
         <h3>Nella sala</h3>
         <ul id="listaSala"></ul>
@@ -348,12 +392,71 @@
       <p class="nota">Attendi che il Master dia inizio all'indagine...</p>
     </section>
 
-    <!-- CARTA SEGRETA DEL PARTECIPANTE -->
+    <section id="schermataRegole" class="nascosto" data-schermata>
+      <h2>Le regole del gioco</h2>
+      <p class="avviso">Leggetele con calma. Il Master dirà quando svelare le carte.</p>
+      <div class="scheda-horror">
+        <ol class="regole">
+          <li>Il Master è il narratore: guida la partita, non gioca e non vota.</li>
+          <li>Ognuno riceve una carta segreta. Non mostrarla a nessuno e non fotografarla.</li>
+          <li>Tra voi ci sono uno o più assassini. Gli investigatori devono eliminarli tutti.</li>
+          <li>Solo gli assassini possono mentire sul delitto. Se sei innocente non inventare fatti falsi, ma puoi tenere per te un tuo segreto.</li>
+          <li>Quando compare «ORA DEVI PARLARE TU!», racconta quello che sai. Poi premi «PASSA IL TURNO».</li>
+          <li>Non interrompere chi parla. Ascolta e confronta le versioni.</li>
+          <li>Dopo domande, indizi e confronto, il Master apre la votazione. Il voto è segreto: un solo voto, mai per te stesso.</li>
+          <li>Chi ha più voti viene eliminato. Se c'è un pareggio si fa uno spareggio. Se persiste, nessuno viene eliminato.</li>
+          <li>Gli eliminati non parlano e non votano più, ma possono continuare a guardare.</li>
+          <li>Dopo ogni eliminazione si riparte con nuovi indizi. Vincono gli investigatori se eliminano tutti gli assassini. Vincono gli assassini se restano pari o più numerosi degli investigatori, o se scade il tempo.</li>
+        </ol>
+      </div>
+      <p class="nota">In attesa che il Master svela le carte...</p>
+    </section>
+
     <section id="schermataCarta" class="nascosto" data-schermata>
       <h2>La tua carta segreta</h2>
       <p class="avviso">Non mostrarla a nessuno.</p>
-      <div class="timer" id="cartaTimer">--:--</div>
+      <div class="timer timer-live" id="cartaTimer">--:--</div>
+      <div class="banner-turno" id="bannerTurno"></div>
       <div class="scheda-horror" id="cartaContenuto"></div>
+    </section>
+
+    <section id="schermataTurno" class="nascosto" data-schermata>
+      <div class="turno-grande">ORA DEVI<br>PARLARE TU!</div>
+      <div class="scheda-horror">
+        <p>DEVI RACCONTARE:</p>
+        <h3 id="turnoDomanda"></h3>
+      </div>
+      <button class="pulsante" id="btnPassaTurno" onclick="passaTurno()">HO FINITO: PASSA IL TURNO ➜</button>
+    </section>
+
+    <section id="schermataVoto" class="nascosto" data-schermata>
+      <h2 id="votoTitolo">Votazione aperta</h2>
+      <p class="avviso">Il tuo voto è segreto. Puoi votare una sola persona.</p>
+      <div id="opzioniVoto"></div>
+    </section>
+
+    <section id="schermataVotoInviato" class="nascosto" data-schermata>
+      <h2>Voto registrato</h2>
+      <p>Hai votato. Attendi che il Master chiuda la votazione.</p>
+    </section>
+
+    <section id="schermataRisultato" class="nascosto" data-schermata>
+      <h2>Risultato della votazione</h2>
+      <div id="risultatoContenuto"></div>
+      <p class="nota">Il Master riprenderà con il riepilogo e i nuovi indizi.</p>
+    </section>
+
+    <section id="schermataEliminato" class="nascosto" data-schermata>
+      <h2>Sei stato eliminato</h2>
+      <p>Non puoi più parlare né votare, ma puoi continuare a seguire la partita.</p>
+      <div class="banner-turno" id="bannerEliminato"></div>
+    </section>
+
+    <section id="schermataFine" class="nascosto" data-schermata>
+      <h2>LA NOTTE È FINITA</h2>
+      <div class="esito" id="fineEsito"></div>
+      <div class="scheda-horror" id="fineContenuto"></div>
+      <button class="pulsante" onclick="uscitaDallaPartita()">TORNA ALL'INIZIO</button>
     </section>
   </main>
 
@@ -364,6 +467,8 @@
     const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_CCSeAXTwCZN2uzr_48iWhQ_TXhBhDbW';
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
+    const URL_SITO = 'https://sirietta888-byte.github.io/IL-MISTERO-DELLA-NOTTE/';
+
     const NOMI_LUOGHI = {
       villa: 'Villa abbandonata',
       castello: 'Castello maledetto',
@@ -371,10 +476,36 @@
       paese: 'Paese misterioso'
     };
 
+    const NOMI_FASE = {
+      rules: 'Lettura delle regole',
+      cards: 'Carte svelate',
+      testimonianze: 'Testimonianze',
+      indizi: 'Domande e indizi',
+      confronto: 'Confronto libero',
+      votazione: 'Votazione',
+      spareggio: 'Pareggio: spareggio',
+      risultato: 'Risultato e riepilogo',
+      finita: 'Partita finita'
+    };
+
+    // ---------- Memoria locale: permette di riprendere dopo un ricaricamento ----------
+    const mem = {
+      get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+      set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) { /* ignora */ } },
+      del: function (k) { try { localStorage.removeItem(k); } catch (e) { /* ignora */ } }
+    };
+    const CHIAVI = ['mistero_ruolo', 'mistero_master_token', 'mistero_game_code',
+                    'mistero_player_id', 'mistero_session_token', 'mistero_player_name'];
+    function dimenticaSessione() { CHIAVI.forEach(mem.del); }
+
     let codicePartita = null;
-    let timerSala = null;       // polling stato stanza
-    let timerOrologio = null;   // conto alla rovescia
-    let partitaIniziataGestita = false;
+    let timerCiclo = null;
+    let cartaRenderizzata = false;
+    let firmaVoto = '';
+    let firmaAzioni = '';
+    let firmaGiocatori = '';
+    let firmaSoluzione = '';
+    let timerBase = { sec: null, at: 0, pausa: false };
 
     // ---------- Navigazione: una sola schermata visibile alla volta ----------
     function mostra(id) {
@@ -388,30 +519,38 @@
     function mostraPartecipante() { mostra('partecipante'); }
     function tornaInizio() { mostra('inizio'); }
 
+    function el(id) { return document.getElementById(id); }
+    function testo(id, valore) { el(id).textContent = valore; }
+    function svuota(nodo) { nodo.replaceChildren(); }
+    function nuovo(tag, classe, contenuto) {
+      const n = document.createElement(tag);
+      if (classe) n.className = classe;
+      if (contenuto !== undefined) n.textContent = contenuto;
+      return n;
+    }
+
     // ---------- Configurazione partita ----------
     (function creaPulsantiNumero() {
-      const box = document.getElementById('sceltaNumeri');
+      const box = el('sceltaNumeri');
       for (let n = 2; n <= 30; n++) {
-        const b = document.createElement('button');
+        const b = nuovo('button', 'numero-btn' + (n === 6 ? ' selezionato' : ''), n);
         b.type = 'button';
-        b.className = 'numero-btn' + (n === 6 ? ' selezionato' : '');
-        b.textContent = n;
         b.onclick = function () { selezionaNumero(n); };
         box.appendChild(b);
       }
     })();
 
     function selezionaNumero(numero) {
-      document.getElementById('numero').value = numero;
-      document.getElementById('numeroScelto').textContent = 'Partecipanti selezionati: ' + numero;
+      el('numero').value = numero;
+      testo('numeroScelto', 'Partecipanti selezionati: ' + numero);
       document.querySelectorAll('.numero-btn').forEach(function (b) {
         b.classList.toggle('selezionato', b.textContent.trim() === String(numero));
       });
     }
 
     function selezionaLuogo(luogo, pulsante) {
-      document.getElementById('luogo').value = luogo;
-      document.getElementById('luogoScelto').textContent = 'Luogo selezionato: ' + NOMI_LUOGHI[luogo];
+      el('luogo').value = luogo;
+      testo('luogoScelto', 'Luogo selezionato: ' + NOMI_LUOGHI[luogo]);
       document.querySelectorAll('.luogo-card').forEach(function (c) {
         c.classList.remove('selezionato');
         c.setAttribute('aria-pressed', 'false');
@@ -421,8 +560,8 @@
     }
 
     function selezionaDurata(minuti, pulsante) {
-      document.getElementById('durata').value = minuti;
-      document.getElementById('durataScelta').textContent = 'Durata selezionata: ' + minuti + ' minuti';
+      el('durata').value = minuti;
+      testo('durataScelta', 'Durata selezionata: ' + minuti + ' minuti');
       document.querySelectorAll('.durata-card').forEach(function (c) { c.classList.remove('selezionato'); });
       pulsante.classList.add('selezionato');
     }
@@ -440,7 +579,6 @@
         p_player_limit: Number(numeroGiocatori),
         p_duration_minutes: Number(durataMinuti)
       });
-
       if (error) {
         console.error('Errore creazione stanza:', error.message);
         alert('Non riesco a creare la stanza online: ' + error.message);
@@ -451,44 +589,38 @@
         return null;
       }
 
-      ['mistero_player_id', 'mistero_session_token'].forEach(function (k) { sessionStorage.removeItem(k); });
-      sessionStorage.setItem('mistero_master_token', data.master_token);
-      sessionStorage.setItem('mistero_game_code', data.code);
+      dimenticaSessione();
+      mem.set('mistero_ruolo', 'master');
+      mem.set('mistero_master_token', data.master_token);
+      mem.set('mistero_game_code', data.code);
       return data;
     }
 
     async function creaPartita() {
-      const luogo = document.getElementById('luogo').value;
-      const numero = document.getElementById('numero').value;
-      const durata = document.getElementById('durata').value;
-
-      const risultato = await creaPartitaOnline(luogo, numero, durata);
+      const risultato = await creaPartitaOnline(el('luogo').value, el('numero').value, el('durata').value);
       if (!risultato) return;
 
       codicePartita = risultato.code;
-      document.getElementById('codiceCreato').textContent = codicePartita;
-      document.getElementById('linkInvito').value =
-        window.location.origin + window.location.pathname + '?partita=' + codicePartita;
-
+      testo('codiceCreato', codicePartita);
+      el('linkInvito').value = URL_SITO + '?partita=' + codicePartita;
+      resetStatoGrafico();
       mostra('partitaCreata');
-      avviaAggiornamentoSala();
+      avviaCiclo();
     }
 
     function copiaInvito() {
-      const campo = document.getElementById('linkInvito');
-      const msg = document.getElementById('messaggioInvito');
+      const campo = el('linkInvito');
       campo.select();
       campo.setSelectionRange(0, 99999);
       navigator.clipboard.writeText(campo.value)
-        .then(function () { msg.textContent = 'Link copiato! Puoi inviarlo ai partecipanti.'; })
-        .catch(function () { msg.textContent = 'Seleziona e copia il link manualmente.'; });
+        .then(function () { testo('messaggioInvito', 'Link copiato! Puoi inviarlo ai partecipanti.'); })
+        .catch(function () { testo('messaggioInvito', 'Seleziona e copia il link manualmente.'); });
     }
 
     // ---------- Ingresso partecipante ----------
     async function entraPartita() {
-      const nome = document.getElementById('nomeGiocatore').value.trim();
-      const codice = document.getElementById('codiceIngresso').value.trim().toUpperCase();
-
+      const nome = el('nomeGiocatore').value.trim();
+      const codice = el('codiceIngresso').value.trim().toUpperCase();
       if (!nome || !codice) {
         alert('Inserisci il tuo nome e il codice della stanza.');
         return;
@@ -500,92 +632,62 @@
         return;
       }
 
-      sessionStorage.removeItem('mistero_master_token');
-      sessionStorage.setItem('mistero_player_id', data.player_id);
-      sessionStorage.setItem('mistero_session_token', data.session_token);
-      sessionStorage.setItem('mistero_game_code', data.game_code);
+      dimenticaSessione();
+      mem.set('mistero_ruolo', 'giocatore');
+      mem.set('mistero_player_id', data.player_id);
+      mem.set('mistero_session_token', data.session_token);
+      mem.set('mistero_game_code', data.game_code);
+      mem.set('mistero_player_name', nome);
 
       codicePartita = data.game_code;
-      document.getElementById('nomeInAttesa').textContent = nome;
-      document.getElementById('codiceInAttesa').textContent = data.game_code;
-
+      testo('nomeInAttesa', nome);
+      testo('codiceInAttesa', data.game_code);
+      resetStatoGrafico();
       mostra('salaAttesa');
-      avviaAggiornamentoSala();
+      avviaCiclo();
     }
 
-    // ---------- Sala d'attesa sincronizzata (polling ogni 3 s) ----------
-    function riempiLista(lista, nomi) {
-      if (!lista) return;
-      lista.replaceChildren();
-      if (nomi.length === 0) {
-        const li = document.createElement('li');
-        li.textContent = 'In attesa dei partecipanti...';
-        lista.appendChild(li);
-        return;
+    function resetStatoGrafico() {
+      cartaRenderizzata = false; firmaVoto = ''; firmaAzioni = ''; firmaGiocatori = ''; firmaSoluzione = '';
+    }
+
+    // ---------- Un solo controllo periodico dello stato ufficiale (server) ----------
+    function avviaCiclo() {
+      fermaCiclo();
+      eseguiCiclo();
+      timerCiclo = setInterval(function () { if (!document.hidden) eseguiCiclo(); }, 2500);
+    }
+    function fermaCiclo() { if (timerCiclo) { clearInterval(timerCiclo); timerCiclo = null; } }
+
+    async function eseguiCiclo() {
+      if (mem.get('mistero_ruolo') === 'master') await aggiornaMaster();
+      else if (mem.get('mistero_ruolo') === 'giocatore') await aggiornaGiocatore();
+    }
+
+    // ---------- Timer: il server dice quanti secondi restano ----------
+    function impostaTimer(t) {
+      if (!t || t.remaining_seconds === null || t.remaining_seconds === undefined) {
+        timerBase = { sec: null, at: Date.now(), pausa: false };
+      } else {
+        timerBase = { sec: t.remaining_seconds, at: Date.now(), pausa: !!t.paused };
       }
-      nomi.forEach(function (nome) {
-        const li = document.createElement('li');
-        li.textContent = nome;
-        lista.appendChild(li);
-      });
+      disegnaTimer();
     }
-
-    async function aggiornaSalaAttesa() {
-      const codice = codicePartita || sessionStorage.getItem('mistero_game_code');
-      if (!codice) return;
-
-      const { data, error } = await supabaseClient.rpc('get_game_state', { p_code: codice });
-      if (error || !data) {
-        if (error) console.error('Errore sala d\'attesa:', error.message);
-        return;
+    function disegnaTimer() {
+      let testoTimer = '--:--';
+      if (timerBase.sec !== null) {
+        const passati = timerBase.pausa ? 0 : (Date.now() - timerBase.at) / 1000;
+        const sec = Math.max(0, Math.round(timerBase.sec - passati));
+        testoTimer = String(Math.floor(sec / 60)).padStart(2, '0') + ':' + String(sec % 60).padStart(2, '0');
+        if (timerBase.pausa) testoTimer += ' (pausa)';
       }
-
-      const nomi = data.players || [];
-      riempiLista(document.getElementById('listaPartecipanti'), nomi);
-      riempiLista(document.getElementById('listaSala'), nomi);
-
-      const stato = document.getElementById('statoPartita');
-      if (stato && data.status === 'waiting') {
-        stato.textContent = nomi.length + ' / ' + data.player_limit +
-          ' partecipanti. La partita non è ancora iniziata.';
-      }
-
-      // Il partecipante passa da solo alla propria carta quando il Master avvia.
-      const sonoPartecipante = sessionStorage.getItem('mistero_player_id');
-      if (data.status === 'playing' && sonoPartecipante && !partitaIniziataGestita) {
-        partitaIniziataGestita = true;
-        fermaAggiornamentoSala();
-        await mostraMiaCarta(data);
-      }
+      document.querySelectorAll('.timer-live').forEach(function (n) { n.textContent = testoTimer; });
     }
+    setInterval(disegnaTimer, 1000);
 
-    function avviaAggiornamentoSala() {
-      fermaAggiornamentoSala();
-      aggiornaSalaAttesa();
-      timerSala = setInterval(function () {
-        if (!document.hidden) aggiornaSalaAttesa();
-      }, 3000);
-    }
-
-    function fermaAggiornamentoSala() {
-      if (timerSala) { clearInterval(timerSala); timerSala = null; }
-    }
-
-    // ---------- Timer sincronizzato: calcolato da started_at del server ----------
-    function avviaOrologio(startedAt, durataMinuti, idElemento) {
-      if (timerOrologio) clearInterval(timerOrologio);
-      const fine = new Date(startedAt).getTime() + durataMinuti * 60000;
-      function tick() {
-        const el = document.getElementById(idElemento);
-        const sec = Math.max(0, Math.round((fine - Date.now()) / 1000));
-        el.textContent = String(Math.floor(sec / 60)).padStart(2, '0') + ':' + String(sec % 60).padStart(2, '0');
-        if (sec === 0 && timerOrologio) { clearInterval(timerOrologio); timerOrologio = null; }
-      }
-      tick();
-      timerOrologio = setInterval(tick, 1000);
-    }
-
-    // ---------- Carta segreta del partecipante ----------
+    // =====================================================================
+    //  PARTECIPANTE
+    // =====================================================================
     const ETICHETTE_CARTA = [
       ['dove_ero_davvero', 'Dove ti trovavi'],
       ['orario', 'Quando'],
@@ -599,162 +701,463 @@
       ['non_conosci', 'Cosa non conosci']
     ];
 
-    async function mostraMiaCarta(stato) {
-      const { data, error } = await supabaseClient.rpc('get_my_card', {
-        p_code: codicePartita,
-        p_player_id: sessionStorage.getItem('mistero_player_id'),
-        p_session_token: sessionStorage.getItem('mistero_session_token')
-      });
-      if (error || !data || !data.card) {
-        partitaIniziataGestita = false;
-        if (error) alert('Non riesco a leggere la tua carta: ' + error.message);
-        avviaAggiornamentoSala();
+    function riempiLista(lista, nomi) {
+      if (!lista) return;
+      svuota(lista);
+      if (nomi.length === 0) lista.appendChild(nuovo('li', '', 'In attesa dei partecipanti...'));
+      nomi.forEach(function (n) { lista.appendChild(nuovo('li', '', n)); });
+    }
+
+    async function aggiornaGiocatore() {
+      const codice = mem.get('mistero_game_code');
+      if (!codice) return;
+      codicePartita = codice;
+
+      const { data: stato, error } = await supabaseClient.rpc('get_game_state', { p_code: codice });
+      if (error) { console.error('Errore stato partita:', error.message); return; }
+      if (!stato) {                       // la stanza non esiste più
+        fermaCiclo(); dimenticaSessione(); mostra('inizio'); return;
+      }
+
+      riempiLista(el('listaSala'), stato.players || []);
+      impostaTimer(stato.timer);
+
+      if (stato.status === 'waiting') {
+        testo('nomeInAttesa', mem.get('mistero_player_name') || '');
+        testo('codiceInAttesa', codice);
+        mostra('salaAttesa');
         return;
       }
 
-      const box = document.getElementById('cartaContenuto');
-      box.replaceChildren();
-
-      const nome = document.createElement('p');
-      nome.textContent = 'PERSONAGGIO: ' + data.card.nome;
-      const ruolo = document.createElement('div');
-      ruolo.className = 'ruolo-grande';
-      ruolo.textContent = data.card.ruolo;
-      box.append(nome, ruolo);
-
-      ETICHETTE_CARTA.forEach(function (coppia) {
-        const testo = data.card[coppia[0]];
-        if (!testo) return;
-        const campo = document.createElement('div');
-        campo.className = 'campo-carta';
-        const et = document.createElement('span');
-        et.className = 'etichetta';
-        et.textContent = coppia[1];
-        const val = document.createElement('p');
-        val.className = 'valore';
-        val.textContent = testo;
-        campo.append(et, val);
-        box.appendChild(campo);
+      const { data: me, error: err2 } = await supabaseClient.rpc('get_my_card', {
+        p_code: codice,
+        p_player_id: mem.get('mistero_player_id'),
+        p_session_token: mem.get('mistero_session_token')
       });
-
-      mostra('schermataCarta');
-      if (stato && stato.started_at) avviaOrologio(stato.started_at, stato.duration_minutes, 'cartaTimer');
+      if (err2) {
+        console.error('Errore lettura carta:', err2.message);
+        if (/non autorizzato/i.test(err2.message)) { fermaCiclo(); dimenticaSessione(); mostra('inizio'); }
+        return;
+      }
+      if (me && me.card && !cartaRenderizzata) disegnaCarta(me.card);
+      renderGiocatore(stato, me);
     }
 
-    // ---------- Avvio e pannello del Master ----------
-    async function iniziaIndagine() {
-      const codice = sessionStorage.getItem('mistero_game_code');
-      const token = sessionStorage.getItem('mistero_master_token');
+    function disegnaCarta(card) {
+      const box = el('cartaContenuto');
+      svuota(box);
+      box.appendChild(nuovo('p', '', 'PERSONAGGIO: ' + card.nome));
+      box.appendChild(nuovo('div', 'ruolo-grande', card.ruolo));
+      ETICHETTE_CARTA.forEach(function (coppia) {
+        const t = card[coppia[0]];
+        if (!t) return;
+        const campo = nuovo('div', 'campo-carta');
+        campo.appendChild(nuovo('span', 'etichetta', coppia[1]));
+        campo.appendChild(nuovo('p', 'valore', t));
+        box.appendChild(campo);
+      });
+      cartaRenderizzata = true;
+    }
 
+    function testoStatoPartita(stato) {
+      const t = stato.turn || {};
+      const righe = [];
+      righe.push('Ciclo ' + stato.cycle + ' · ' + (NOMI_FASE[stato.phase] || stato.phase));
+      if (stato.phase === 'testimonianze') {
+        if (t.open) righe.push('Sta parlando: ' + t.current_name);
+        else righe.push('Il giro è finito: hanno parlato tutti.');
+        if ((t.spoken || []).length) righe.push('Hanno già parlato: ' + t.spoken.join(', '));
+        if (t.question) righe.push('Domanda: ' + t.question);
+      } else if (stato.phase === 'cards') {
+        righe.push('Attendi: il Master avvierà le testimonianze.');
+      } else if (stato.phase === 'spareggio') {
+        righe.push('Pareggio tra: ' + ((stato.vote || {}).candidates || []).join(', ') + '. Confrontatevi: poi il Master aprirà lo spareggio.');
+      }
+      const elim = (stato.eliminated || []).map(function (e) { return e.name + (e.role ? ' (' + e.role + ')' : ''); });
+      if (elim.length) righe.push('Eliminati: ' + elim.join(', '));
+      return righe;
+    }
+    function scriviBanner(box, righe) {
+      svuota(box);
+      righe.forEach(function (r) { box.appendChild(nuovo('p', '', r)); });
+    }
+
+    function renderGiocatore(stato, me) {
+      const idMio = mem.get('mistero_player_id');
+      const t = stato.turn || {};
+
+      if (stato.status === 'finished') { disegnaFine(stato, me); return; }
+      if (stato.phase === 'rules') { mostra('schermataRegole'); return; }
+      if (!me) return;
+
+      if (!me.active) {
+        scriviBanner(el('bannerEliminato'), testoStatoPartita(stato));
+        mostra('schermataEliminato');
+        return;
+      }
+
+      if (stato.phase === 'votazione' && stato.vote && stato.vote.open) {
+        if (me.has_voted) { mostra('schermataVotoInviato'); return; }
+        disegnaVoto(stato, me);
+        mostra('schermataVoto');
+        return;
+      }
+
+      if (stato.phase === 'risultato') {
+        disegnaRisultato(stato.last_vote, false, null);
+        mostra('schermataRisultato');
+        return;
+      }
+
+      if (stato.phase === 'testimonianze' && t.open && t.current_id === idMio) {
+        testo('turnoDomanda', t.question || '');
+        mostra('schermataTurno');
+        return;
+      }
+
+      scriviBanner(el('bannerTurno'), testoStatoPartita(stato));
+      mostra('schermataCarta');
+    }
+
+    async function passaTurno() {
+      const pulsante = el('btnPassaTurno');
+      pulsante.disabled = true;
+      const { error } = await supabaseClient.rpc('pass_turn', {
+        p_code: mem.get('mistero_game_code'),
+        p_player_id: mem.get('mistero_player_id'),
+        p_session_token: mem.get('mistero_session_token')
+      });
+      pulsante.disabled = false;
+      if (error) alert('Non riesco a passare il turno: ' + error.message);
+      await aggiornaGiocatore();
+    }
+
+    // ---------- Votazione (segreta) ----------
+    function disegnaVoto(stato, me) {
+      const opzioni = me.vote_options || [];
+      const firma = stato.vote.no + ':' + opzioni.map(function (o) { return o.id; }).join(',');
+      if (firma === firmaVoto) return;
+      firmaVoto = firma;
+
+      testo('votoTitolo', stato.vote.kind === 'runoff' ? 'Spareggio: vota un candidato' : 'Votazione: chi eliminare?');
+      const box = el('opzioniVoto');
+      svuota(box);
+      opzioni.forEach(function (o) {
+        const b = nuovo('button', 'opzione-voto', o.name);
+        b.type = 'button';
+        b.onclick = function () { inviaVoto(o); };
+        box.appendChild(b);
+      });
+    }
+
+    async function inviaVoto(opzione) {
+      if (!confirm('Vuoi votare ' + opzione.name + '? Non potrai cambiare il voto.')) return;
+      const { error } = await supabaseClient.rpc('cast_vote', {
+        p_code: mem.get('mistero_game_code'),
+        p_player_id: mem.get('mistero_player_id'),
+        p_session_token: mem.get('mistero_session_token'),
+        p_target_id: opzione.id
+      });
+      if (error) alert('Voto non valido: ' + error.message);
+      await aggiornaGiocatore();
+    }
+
+    // Risultato di una votazione (giocatori: solo totali; Master: anche chi ha votato chi)
+    function disegnaRisultato(lv, perMaster, dettaglio) {
+      const box = perMaster ? el('masterEsito') : el('risultatoContenuto');
+      svuota(box);
+      if (!lv) return;
+      if (lv.eliminated) {
+        box.appendChild(nuovo('div', 'esito', 'ELIMINATO: ' + lv.eliminated));
+        if (lv.eliminated_role) box.appendChild(nuovo('p', '', 'Era: ' + lv.eliminated_role));
+      } else if (lv.tie && lv.candidates) {
+        box.appendChild(nuovo('div', 'esito', 'PAREGGIO'));
+        box.appendChild(nuovo('p', '', 'Spareggio tra: ' + lv.candidates.join(', ')));
+      } else {
+        box.appendChild(nuovo('div', 'esito', 'NESSUNA ELIMINAZIONE'));
+        box.appendChild(nuovo('p', '', lv.tie ? 'Il pareggio è rimasto anche allo spareggio.' : 'Nessun voto valido.'));
+      }
+      (lv.tally || []).forEach(function (r) {
+        const riga = nuovo('div', 'riga-esito');
+        riga.appendChild(nuovo('span', '', r.name));
+        riga.appendChild(nuovo('strong', '', r.votes + (r.votes === 1 ? ' voto' : ' voti')));
+        box.appendChild(riga);
+      });
+      if (lv.abstained) box.appendChild(nuovo('p', 'nota', 'Astenuti: ' + lv.abstained));
+      if (perMaster && dettaglio && dettaglio.length) {
+        box.appendChild(nuovo('p', 'nota', 'Dettaglio (solo Master): ' +
+          dettaglio.map(function (d) { return d.voter + ' → ' + d.target; }).join(' · ')));
+      }
+    }
+
+    // ---------- Fine partita ----------
+    function disegnaFine(stato, me) {
+      const vinceInv = stato.win_team === 'investigatori';
+      testo('fineEsito', vinceInv ? 'HANNO VINTO GLI INVESTIGATORI!' : 'HANNO VINTO GLI ASSASSINI!');
+      const box = el('fineContenuto');
+      svuota(box);
+      if (me && me.card) box.appendChild(nuovo('p', '', 'Il tuo ruolo era: ' + me.card.ruolo));
+      const elim = (stato.eliminated || []).map(function (e) { return e.name + (e.role ? ' (' + e.role + ')' : ''); });
+      if (elim.length) box.appendChild(nuovo('p', '', 'Eliminati: ' + elim.join(', ')));
+      if (stato.solution) {
+        box.appendChild(nuovo('h3', '', 'La verità'));
+        scriviSoluzione(box, stato.solution);
+      } else {
+        box.appendChild(nuovo('p', 'nota', 'Il Master rivelerà presto la soluzione...'));
+      }
+      mostra('schermataFine');
+    }
+
+    function scriviSoluzione(box, sol) {
+      [['Vittima', sol.vittima], ['Luogo del delitto', sol.luogo_delitto], ['Ora', sol.ora_delitto],
+       ['Arma', sol.arma], ['Assassini', sol.colpevole], ['Movente', sol.movente],
+       ['Spiegazione', sol.spiegazione]].forEach(function (r) {
+        if (!r[1]) return;
+        const p = nuovo('p');
+        p.appendChild(nuovo('strong', '', r[0] + ': '));
+        p.appendChild(document.createTextNode(r[1]));
+        box.appendChild(p);
+      });
+      box.appendChild(nuovo('h3', '', 'Cronologia reale'));
+      (sol.cronologia || []).forEach(function (e) { box.appendChild(nuovo('p', '', e.ora + ' — ' + e.evento)); });
+    }
+
+    function uscitaDallaPartita() {
+      fermaCiclo();
+      dimenticaSessione();
+      resetStatoGrafico();
+      mostra('inizio');
+    }
+
+    // =====================================================================
+    //  MASTER
+    // =====================================================================
+    async function iniziaIndagine() {
+      const codice = mem.get('mistero_game_code');
+      const token = mem.get('mistero_master_token');
       if (!codice || !token) {
         alert('Chiave del Master non trovata. Crea una nuova partita.');
         return;
       }
 
-      // start_game verifica il token, assegna i ruoli e crea soluzione e carte sul server.
-      const { error } = await supabaseClient.rpc('start_game', { p_code: codice, p_master_token: token });
-      if (error) {
-        alert('Impossibile avviare la partita: ' + error.message);
-        return;
-      }
+      const opz = await supabaseClient.rpc('set_game_options', {
+        p_code: codice, p_master_token: token,
+        p_reveal_role: el('optRuolo').checked, p_allow_pause: el('optPausa').checked
+      });
+      if (opz.error) { alert('Opzioni non salvate: ' + opz.error.message); return; }
 
-      fermaAggiornamentoSala();
-      await caricaPannelloMaster();
+      const { error } = await supabaseClient.rpc('start_game', { p_code: codice, p_master_token: token });
+      if (error) { alert('Impossibile avviare la partita: ' + error.message); return; }
+      await aggiornaMaster();
     }
 
-    let datiMaster = null;
-
-    async function caricaPannelloMaster() {
+    async function aggiornaMaster() {
+      const codice = mem.get('mistero_game_code');
       const { data, error } = await supabaseClient.rpc('get_master_overview', {
-        p_code: sessionStorage.getItem('mistero_game_code'),
-        p_master_token: sessionStorage.getItem('mistero_master_token')
+        p_code: codice, p_master_token: mem.get('mistero_master_token')
       });
       if (error || !data) {
-        alert('Non riesco a leggere il pannello Master: ' + (error ? error.message : 'nessun dato'));
+        if (error) console.error('Errore pannello Master:', error.message);
+        if (error && /non validi/i.test(error.message)) { fermaCiclo(); dimenticaSessione(); mostra('inizio'); }
         return;
       }
-      datiMaster = data;
+      impostaTimer(data.timer);
 
-      document.getElementById('masterLuogo').textContent = NOMI_LUOGHI[data.location] || data.location;
+      if (data.status === 'waiting') {
+        // lobby del Master: riprende lo stato anche dopo un ricaricamento
+        testo('codiceCreato', codice);
+        el('linkInvito').value = URL_SITO + '?partita=' + codice;
+        const nomi = (data.players || []).map(function (p) { return p.name; });
+        riempiLista(el('listaPartecipanti'), nomi);
+        testo('statoPartita', nomi.length + ' partecipanti nella sala. La partita non è ancora iniziata.');
+        if (el('partitaCreata').classList.contains('nascosto')) mostra('partitaCreata');
+        return;
+      }
+      renderMaster(data);
+    }
 
-      // Soluzione (testo inserito con textContent: niente HTML iniettato)
-      const sol = data.solution || {};
-      const boxSol = document.getElementById('masterSoluzione');
-      boxSol.replaceChildren();
-      [['Vittima', sol.vittima], ['Luogo del delitto', sol.luogo_delitto], ['Ora', sol.ora_delitto],
-       ['Arma', sol.arma], ['Colpevole', sol.colpevole], ['Movente', sol.movente],
-       ['Spiegazione', sol.spiegazione]].forEach(function (r) {
-        if (!r[1]) return;
-        const p = document.createElement('p');
-        const b = document.createElement('strong');
-        b.textContent = r[0] + ': ';
-        p.append(b, document.createTextNode(r[1]));
-        boxSol.appendChild(p);
-      });
-      const crono = document.createElement('h3');
-      crono.textContent = 'Cronologia reale';
-      boxSol.appendChild(crono);
-      (sol.cronologia || []).forEach(function (e) {
-        const p = document.createElement('p');
-        p.textContent = e.ora + ' — ' + e.evento;
-        boxSol.appendChild(p);
-      });
+    function azioniPerFase(d) {
+      const t = d.turn || {};
+      const a = [];
+      if (d.status === 'finished') {
+        if (!d.solution_revealed) a.push({ et: 'RIVELA LA SOLUZIONE AI GIOCATORI', fn: 'reveal_solution' });
+        a.push({ et: 'NUOVA INDAGINE', fn: '@nuova', sec: true });
+        return a;
+      }
+      switch (d.phase) {
+        case 'rules':
+          a.push({ et: 'SVELA LE CARTE', fn: 'reveal_cards' }); break;
+        case 'cards':
+          a.push({ et: 'AVVIA IL PRIMO GIRO DI TESTIMONIANZE', fn: 'start_round' }); break;
+        case 'testimonianze':
+          if (t.open) a.push({ et: 'SALTA IL TURNO', fn: 'master_skip_turn', sec: true });
+          else {
+            a.push({ et: 'DOMANDE E INDIZI', fn: 'set_phase:indizi' });
+            a.push({ et: 'CONFRONTO LIBERO', fn: 'set_phase:confronto' });
+            a.push({ et: 'ALTRO GIRO DI TESTIMONIANZE', fn: 'start_round', sec: true });
+            a.push({ et: 'APRI LA VOTAZIONE', fn: 'open_vote' });
+          }
+          break;
+        case 'indizi':
+        case 'confronto':
+          a.push({ et: d.phase === 'indizi' ? 'PASSA AL CONFRONTO LIBERO' : 'TORNA A DOMANDE E INDIZI',
+                   fn: d.phase === 'indizi' ? 'set_phase:confronto' : 'set_phase:indizi' });
+          a.push({ et: 'NUOVO GIRO DI TESTIMONIANZE', fn: 'start_round', sec: true });
+          a.push({ et: 'APRI LA VOTAZIONE', fn: 'open_vote' });
+          break;
+        case 'votazione':
+          a.push({ et: 'CHIUDI LA VOTAZIONE', fn: 'close_vote' }); break;
+        case 'spareggio':
+          a.push({ et: 'APRI LO SPAREGGIO', fn: 'open_vote' }); break;
+        case 'risultato':
+          a.push({ et: 'NUOVO CICLO: NUOVI INDIZI E DOMANDE', fn: 'set_phase:indizi' }); break;
+        default: break;
+      }
+      return a;
+    }
 
-      // Giocatori con ruolo e carta completa
-      const boxG = document.getElementById('masterGiocatori');
-      boxG.replaceChildren();
-      (data.players || []).forEach(function (g) {
-        const det = document.createElement('details');
-        det.className = 'riga-giocatore';
-        const sum = document.createElement('summary');
-        sum.textContent = g.name;
-        const badge = document.createElement('span');
-        badge.className = 'badge-ruolo';
-        badge.textContent = '— ' + (g.role || '?');
-        sum.appendChild(badge);
-        det.appendChild(sum);
-        ETICHETTE_CARTA.forEach(function (coppia) {
-          const testo = g.card && g.card[coppia[0]];
-          if (!testo) return;
-          const p = document.createElement('p');
-          const b = document.createElement('strong');
-          b.textContent = coppia[1] + ': ';
-          p.append(b, document.createTextNode(testo));
-          det.appendChild(p);
-        });
-        boxG.appendChild(det);
-      });
-
+    function renderMaster(d) {
       mostra('pannelloMaster');
-      if (data.started_at) avviaOrologio(data.started_at, data.duration_minutes, 'masterTimer');
+      const t = d.turn || {};
+      testo('masterLuogo', NOMI_LUOGHI[d.location] || d.location);
+      testo('masterFase', 'Ciclo ' + d.cycle + ' · ' + (NOMI_FASE[d.phase] || d.phase));
+      testo('masterStat1', 'Giocatori all\'inizio: ' + d.initial_players + ' · attivi: ' +
+        ((d.active_assassins || 0) + (d.active_innocents || 0)) + ' · eliminati: ' + (d.eliminated || []).length);
+      testo('masterStat2', 'Assassini all\'inizio: ' + d.initial_assassins + ' · assassini attivi: ' + d.active_assassins +
+        ' · investigatori attivi: ' + d.active_innocents);
+
+      const btnPausa = el('btnPausa');
+      const puoiPausa = d.timer && d.timer.allow_pause && d.status === 'playing';
+      btnPausa.classList.toggle('nascosto', !puoiPausa);
+      if (puoiPausa) btnPausa.textContent = d.timer.paused ? 'RIPRENDI IL TIMER' : 'METTI IN PAUSA';
+
+      // giro di testimonianze
+      const giro = d.phase === 'testimonianze' || (t.round > 0 && d.phase === 'indizi');
+      el('masterInfoGiro').classList.toggle('nascosto', !(d.phase === 'testimonianze'));
+      if (d.phase === 'testimonianze') {
+        testo('masterDomanda', 'Giro ' + t.round + ' - domanda: ' + (t.question || ''));
+        testo('masterParla', t.open ? t.current_name : 'giro concluso');
+        testo('masterHannoParlato', (t.spoken || []).join(', ') || '-');
+        testo('masterDevonoParlare', (t.remaining || []).join(', ') || '-');
+      }
+
+      // stato della votazione
+      const boxVoto = el('masterInfoVoto');
+      boxVoto.classList.toggle('nascosto', !(d.vote && d.vote.open));
+      if (d.vote && d.vote.open) {
+        testo('masterInfoVoto', (d.vote.kind === 'runoff' ? 'SPAREGGIO tra ' + d.vote.candidates.join(', ') + ' — ' : 'VOTAZIONE APERTA — ') +
+          'hanno votato ' + d.vote.cast + ' su ' + d.vote.expected);
+      }
+      // esito dell'ultima votazione
+      const mostraEsito = (d.phase === 'risultato' || d.phase === 'spareggio' || d.status === 'finished') && d.last_vote;
+      el('masterEsito').classList.toggle('nascosto', !mostraEsito);
+      if (mostraEsito) disegnaRisultato(d.last_vote, true, d.last_vote_detail);
+
+      if (d.status === 'finished') {
+        el('masterEsito').classList.remove('nascosto');
+        const x = el('masterEsito');
+        const f = nuovo('div', 'esito', d.win_team === 'investigatori' ? 'VINCONO GLI INVESTIGATORI' : 'VINCONO GLI ASSASSINI');
+        x.insertBefore(f, x.firstChild);
+      }
+
+      // pulsanti d'azione (ricostruiti solo se cambiano)
+      const azioni = azioniPerFase(d);
+      const firma = azioni.map(function (x) { return x.fn; }).join('|');
+      if (firma !== firmaAzioni) {
+        firmaAzioni = firma;
+        const box = el('masterAzioni');
+        svuota(box);
+        azioni.forEach(function (x) {
+          const b = nuovo('button', 'pulsante' + (x.sec ? ' secondario' : ''), x.et);
+          b.type = 'button';
+          b.onclick = function () { eseguiAzione(x.fn, d); };
+          box.appendChild(b);
+        });
+      }
+
+      // soluzione e giocatori (ricostruiti solo se cambiano)
+      const firmaSol = JSON.stringify(d.solution || {});
+      if (firmaSol !== firmaSoluzione) {
+        firmaSoluzione = firmaSol;
+        const boxSol = el('masterSoluzione');
+        svuota(boxSol);
+        scriviSoluzione(boxSol, d.solution || {});
+      }
+      const firmaG = (d.players || []).map(function (g) { return g.id + g.active; }).join(',');
+      if (firmaG !== firmaGiocatori) {
+        firmaGiocatori = firmaG;
+        const boxG = el('masterGiocatori');
+        svuota(boxG);
+        (d.players || []).forEach(function (g) {
+          const det = nuovo('details', 'riga-giocatore');
+          const sum = nuovo('summary', '', g.name);
+          sum.appendChild(nuovo('span', 'badge-ruolo', '— ' + (g.role || '?')));
+          if (!g.active) sum.appendChild(nuovo('span', 'tag-eliminato', 'ELIMINATO'));
+          det.appendChild(sum);
+          ETICHETTE_CARTA.forEach(function (coppia) {
+            const tt = g.card && g.card[coppia[0]];
+            if (!tt) return;
+            const p = nuovo('p');
+            p.appendChild(nuovo('strong', '', coppia[1] + ': '));
+            p.appendChild(document.createTextNode(tt));
+            det.appendChild(p);
+          });
+          boxG.appendChild(det);
+        });
+      }
+    }
+
+    async function eseguiAzione(fn, d) {
+      if (fn === '@nuova') { uscitaDallaPartita(); mostra('configurazione'); return; }
+      if (fn === 'close_vote' && d && d.vote && d.vote.cast < d.vote.expected &&
+          !confirm('Hanno votato ' + d.vote.cast + ' su ' + d.vote.expected + '. Chi non ha votato sarà considerato astenuto. Chiudere?')) return;
+      let nome = fn; const args = {
+        p_code: mem.get('mistero_game_code'), p_master_token: mem.get('mistero_master_token')
+      };
+      if (fn.indexOf('set_phase:') === 0) { nome = 'set_phase'; args.p_phase = fn.split(':')[1]; }
+      const { error } = await supabaseClient.rpc(nome, args);
+      if (error) alert(error.message);
+      await aggiornaMaster();
+    }
+
+    async function alternaPausa() {
+      const inPausa = timerBase.pausa;
+      const { error } = await supabaseClient.rpc('set_pause', {
+        p_code: mem.get('mistero_game_code'), p_master_token: mem.get('mistero_master_token'), p_pause: !inPausa
+      });
+      if (error) alert(error.message);
+      await aggiornaMaster();
+    }
+
+    async function terminaPartita() {
+      if (!confirm('Vuoi terminare la partita adesso? Il vincitore sarà deciso in base a chi è ancora in gioco.')) return;
+      const { error } = await supabaseClient.rpc('end_game', {
+        p_code: mem.get('mistero_game_code'), p_master_token: mem.get('mistero_master_token')
+      });
+      if (error) alert(error.message);
+      await aggiornaMaster();
     }
 
     function alternaSoluzione() {
-      const box = document.getElementById('masterSoluzione');
-      const nascosta = box.classList.toggle('nascosto');
-      document.getElementById('btnSoluzione').textContent = nascosta ? 'MOSTRA SOLUZIONE' : 'NASCONDI SOLUZIONE';
+      const nascosta = el('masterSoluzione').classList.toggle('nascosto');
+      testo('btnSoluzione', nascosta ? 'MOSTRA SOLUZIONE' : 'NASCONDI SOLUZIONE');
     }
 
-    // ---------- Fine e nuova partita (per ora solo locali al dispositivo) ----------
-    function terminaIndagine() {
-      if (timerOrologio) { clearInterval(timerOrologio); timerOrologio = null; }
-      mostra('schermataFinale');
-    }
+    // ---------- Avvio pagina: link d'invito o ripresa della sessione salvata ----------
+    (function avvio() {
+      const codiceUrl = (new URLSearchParams(window.location.search).get('partita') || '').toUpperCase().slice(0, 6);
+      const ruolo = mem.get('mistero_ruolo');
+      const codiceSalvato = mem.get('mistero_game_code');
 
-    function ricominciaPartita() {
-      sessionStorage.removeItem('mistero_master_token');
-      sessionStorage.removeItem('mistero_game_code');
-      partitaIniziataGestita = false;
-      codicePartita = null;
-      mostra('configurazione');
-    }
-
-    // ---------- Link d'invito: ?partita=CODICE apre l'ingresso con il codice già inserito ----------
-    (function apriAccessoPartecipante() {
-      const codice = new URLSearchParams(window.location.search).get('partita');
-      if (!codice) return;
-      document.getElementById('codiceIngresso').value = codice.toUpperCase().slice(0, 6);
-      mostraPartecipante();
+      if (ruolo && codiceSalvato && (!codiceUrl || codiceUrl === codiceSalvato)) {
+        codicePartita = codiceSalvato;                    // ripresa dopo ricaricamento
+        avviaCiclo();
+        return;
+      }
+      if (codiceUrl) {
+        el('codiceIngresso').value = codiceUrl;
+        mostraPartecipante();
+      }
     })();
   </script>
 </body>
