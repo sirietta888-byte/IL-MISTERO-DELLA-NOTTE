@@ -722,7 +722,7 @@ body.in-home::before { opacity: .22; }
     // ---------- Configurazione partita ----------
     (function creaPulsantiNumero() {
       const box = el('sceltaNumeri');
-      for (let n = 2; n <= 30; n++) {
+      for (let n = 5; n <= 30; n++) {
         const b = nuovo('button', 'numero-btn' + (n === 8 ? ' selezionato' : ''), n);
         b.type = 'button';
         b.onclick = function () { selezionaNumero(n); };
